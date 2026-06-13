@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+:root {
+  --bg-base: #020818;
+  --bg-surface: #060f2e;
+  --border-glow: #1a3a6e;
+  --accent-primary: #00aaff;
+  --accent-secondary: #0044cc;
+  --text-primary: #e8f4ff;
+  --text-muted: #4a7aa8;
+  --danger: #ff3366;
+  --font-display: 'Orbitron', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  min-height: 100vh;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 170, 255, 0.012) 2px,
+    rgba(0, 170, 255, 0.012) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+  animation: scanlines 8s linear infinite;
+}
+
+@keyframes scanlines {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Glow card base */
+.card-glow {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glow);
+  border-radius: 6px;
+  box-shadow: 0 0 12px rgba(0, 170, 255, 0.15), inset 0 0 12px rgba(0, 170, 255, 0.03);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-glow:hover {
+  box-shadow: 0 0 24px rgba(0, 170, 255, 0.3), inset 0 0 20px rgba(0, 170, 255, 0.06);
+  border-color: rgba(0, 170, 255, 0.4);
+}
+
+/* Glow text */
+.text-glow {
+  text-shadow: 0 0 20px rgba(0, 170, 255, 0.6);
+}
+
+/* Glow button */
+.btn-glow {
+  background: rgba(0, 170, 255, 0.1);
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-glow:hover {
+  background: rgba(0, 170, 255, 0.2);
+  box-shadow: 0 0 16px rgba(0, 170, 255, 0.4);
+}
+
+.btn-glow-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(255, 51, 102, 0.08);
+}
+
+.btn-glow-danger:hover {
+  background: rgba(255, 51, 102, 0.18);
+  box-shadow: 0 0 16px rgba(255, 51, 102, 0.3);
+}
+
+/* Input glow */
+.input-glow {
+  background: rgba(6, 15, 46, 0.8);
+  border: 1px solid var(--border-glow);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  padding: 0.6rem 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+}
+
+.input-glow:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 12px rgba(0, 170, 255, 0.25);
+}
+
+.input-glow::placeholder {
+  color: var(--text-muted);
+}
+
+/* Status badges */
+.badge-active {
+  background: rgba(0, 170, 255, 0.12);
+  border: 1px solid rgba(0, 170, 255, 0.4);
+  color: var(--accent-primary);
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+}
+
+.badge-building {
+  background: rgba(255, 170, 0, 0.1);
+  border: 1px solid rgba(255, 170, 0, 0.4);
+  color: #ffaa00;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+}
+
+.badge-coming-soon {
+  background: rgba(74, 122, 168, 0.1);
+  border: 1px solid rgba(74, 122, 168, 0.3);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+}
+
+/* Staggered fade-in */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeSlideUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+/* Pulse animation for ZERO button */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(0, 170, 255, 0.4), 0 0 32px rgba(0, 170, 255, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(0, 170, 255, 0.7), 0 0 56px rgba(0, 170, 255, 0.3);
+  }
+}
+
+.pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-glow);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-secondary);
+}
+
+/* Select overrides */
+select.input-glow {
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Orbitron display class */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
