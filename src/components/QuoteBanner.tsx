@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Quote } from '../types'
 
 const SEED_QUOTES: Quote[] = [
   { id: '1', quote: "You don't rise to the level of your goals. You fall to the level of your systems.", attribution: 'James Clear', active: true, sort_order: 0, created_at: '' },
-  { id: '2', quote: 'The scoreboard doesn\'t lie. Build the machine, then let it run.', attribution: 'Jeffry Giordano', active: true, sort_order: 1, created_at: '' },
+  { id: '2', quote: "The scoreboard doesn't lie. Build the machine, then let it run.", attribution: 'Jeffry Giordano', active: true, sort_order: 1, created_at: '' },
   { id: '3', quote: 'Leadership is not about being in charge. It is about taking care of those in your charge.', attribution: 'Simon Sinek', active: true, sort_order: 2, created_at: '' },
   { id: '4', quote: 'Speed is irrelevant if you are going in the wrong direction.', attribution: 'Mahatma Gandhi', active: true, sort_order: 3, created_at: '' },
   { id: '5', quote: 'We are what we repeatedly do. Excellence, then, is not an act but a habit.', attribution: 'Aristotle', active: true, sort_order: 4, created_at: '' },
@@ -14,8 +14,7 @@ const SEED_QUOTES: Quote[] = [
 
 export default function QuoteBanner() {
   const [quotes, setQuotes] = useState<Quote[]>(SEED_QUOTES)
-  const [current, setCurrent] = useState(0)
-  const [fade, setFade] = useState(true)
+  const trackRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const fetchQuotes = async () => {
@@ -29,105 +28,96 @@ export default function QuoteBanner() {
     fetchQuotes()
   }, [])
 
-  useEffect(() => {
-    if (quotes.length <= 1) return
-    const interval = setInterval(() => {
-      setFade(false)
-      setTimeout(() => {
-        setCurrent(c => (c + 1) % quotes.length)
-        setFade(true)
-      }, 500)
-    }, 6000)
-    return () => clearInterval(interval)
-  }, [quotes.length])
-
-  const q = quotes[current]
-  if (!q) return null
+  // Build ticker items — duplicate for seamless loop
+  const items = [...quotes, ...quotes]
 
   return (
     <div
       style={{
         width: '100%',
-        padding: '2rem 3rem',
-        background: 'linear-gradient(180deg, rgba(0,68,204,0.06) 0%, rgba(2,8,24,0) 100%)',
-        borderBottom: '1px solid rgba(0,170,255,0.08)',
-        textAlign: 'center',
-        minHeight: '110px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
+        height: '36px',
+        background: 'rgba(0, 8, 32, 0.95)',
+        borderBottom: '1px solid rgba(0,170,255,0.2)',
+        borderTop: '1px solid rgba(0,170,255,0.1)',
         overflow: 'hidden',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
       }}
     >
-      {/* Particle-like background dots */}
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse at 50% 0%, rgba(0,68,204,0.08) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }}
-      />
+      {/* Left fade */}
+      <div style={{
+        position: 'absolute', left: 0, top: 0, bottom: 0, width: '80px', zIndex: 2,
+        background: 'linear-gradient(90deg, rgba(0,8,32,1) 0%, transparent 100%)',
+        pointerEvents: 'none',
+      }} />
 
+      {/* Right fade */}
+      <div style={{
+        position: 'absolute', right: 0, top: 0, bottom: 0, width: '80px', zIndex: 2,
+        background: 'linear-gradient(270deg, rgba(0,8,32,1) 0%, transparent 100%)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* Scrolling track */}
       <div
+        ref={trackRef}
         style={{
-          transition: 'opacity 0.5s ease',
-          opacity: fade ? 1 : 0,
-          zIndex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0,
+          animation: 'ticker-scroll 60s linear infinite',
+          whiteSpace: 'nowrap',
+          willChange: 'transform',
         }}
       >
-        <p
-          style={{
-            fontFamily: 'Orbitron, sans-serif',
-            fontSize: '1rem',
-            fontWeight: 500,
-            color: '#00aaff',
-            letterSpacing: '0.04em',
-            lineHeight: 1.6,
-            maxWidth: '800px',
-            margin: '0 auto',
-            textShadow: '0 0 20px rgba(0,170,255,0.3)',
-          }}
-        >
-          "{q.quote}"
-        </p>
-        {q.attribution && (
-          <p
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '0.75rem',
-              color: '#4a7aa8',
-              marginTop: '0.6rem',
-              letterSpacing: '0.08em',
-            }}
-          >
-            — {q.attribution}
-          </p>
-        )}
-      </div>
-
-      {/* Dots indicator */}
-      <div style={{ display: 'flex', gap: '0.4rem', marginTop: '1rem', zIndex: 1 }}>
-        {quotes.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => { setFade(false); setTimeout(() => { setCurrent(i); setFade(true) }, 300) }}
-            style={{
-              width: i === current ? '16px' : '6px',
-              height: '3px',
-              borderRadius: '2px',
-              background: i === current ? '#00aaff' : '#1a3a6e',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              padding: 0,
-            }}
-          />
+        {items.map((q, i) => (
+          <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 0 }}>
+            {/* Separator diamond */}
+            <span style={{
+              color: '#00aaff',
+              fontSize: '0.5rem',
+              margin: '0 1.5rem',
+              opacity: 0.6,
+            }}>◆</span>
+            {/* Quote */}
+            <span style={{
+              fontFamily: 'Orbitron, sans-serif',
+              fontSize: '0.65rem',
+              fontWeight: 500,
+              color: '#00aaff',
+              letterSpacing: '0.06em',
+              textShadow: '0 0 12px rgba(0,170,255,0.4)',
+            }}>
+              {q.quote}
+            </span>
+            {/* Attribution */}
+            {q.attribution && (
+              <span style={{
+                fontFamily: 'JetBrains Mono, monospace',
+                fontSize: '0.58rem',
+                color: '#2a5a8e',
+                marginLeft: '0.75rem',
+                letterSpacing: '0.08em',
+              }}>
+                — {q.attribution}
+              </span>
+            )}
+          </span>
         ))}
       </div>
+
+      <style>{`
+        @keyframes ticker-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes ticker-scroll {
+            0%, 100% { transform: translateX(0); }
+          }
+        }
+      `}</style>
     </div>
   )
 }
